@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "alcoa"
+version = "0.1.0"
+description = ""
+authors = ["Gustave Coulombe <magikgus@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numpy = "^1.26.2"
+matplotlib = "^3.8.2"
+scipy = "^1.11.4"
+findiff = "^0.10.0"
+graphinglib = "^1.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
