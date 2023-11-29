@@ -116,7 +116,6 @@ class Garnissage:
 
         Note: ici, 5 et 10 sont des indices, pas des valeurs de x ou t.
         """
-        # combine all phases into one array along the time axis
         T = np.concatenate(self.phases, axis=1)
         return T
 
@@ -125,7 +124,6 @@ class Garnissage:
         Crée une animation du graphique de la température en fonction de la position.
         """
         print(f"Animation du graphique {nom_fichier}")
-        # Create animation
         T = self.get_resultats()
         fig, ax = plt.subplots()
         ax.set_xlabel("x (m)")
@@ -134,7 +132,6 @@ class Garnissage:
         ax.set_ylim(0, 600)
         (line,) = ax.plot([], [], lw=2)
 
-        # add title with time
         time_text = ax.text(
             0.02,
             0.95,
@@ -150,7 +147,6 @@ class Garnissage:
 
         def animate(i):
             line.set_data(self.x, T[:, i])
-            # update time
             time_text.set_text(f"t = {i*self.resolution_temporelle:.2f} s")
             return (line,)
 
@@ -180,7 +176,6 @@ class Garnissage:
         ax.set_ylim(y_min, y_max)
 
         heat_map = ax.pcolormesh(X, Y, np.zeros_like(X), shading="auto", cmap="hot")
-        # add title with time
         time_text = ax.text(
             0.02,
             0.95,
@@ -194,7 +189,6 @@ class Garnissage:
             T_dup = np.tile(T[:, i], (n_y_points, 1)).T
             heat_map.set_array(T_dup.T)
             heat_map.set_clim(0, 600)
-            # update time
             time_text.set_text(f"t = {i*self.resolution_temporelle:.2f} s")
             return (heat_map,)
 
