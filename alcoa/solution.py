@@ -46,7 +46,6 @@ class Garnissage:
     longueur_garnissage: float  # m
     resolution_temporelle: float  # s
     resolution_spatiale: float  # m
-    temperature_initiale_garnissage: float  # K
     phases: list = field(default_factory=list, init=False)
 
     def demarrer_phase(
@@ -66,9 +65,7 @@ class Garnissage:
         )
         if len(self.phases) == 0:
             n_points = int(self.longueur_garnissage / self.resolution_spatiale)
-            temperature_initiale = (
-                np.ones(n_points) * self.temperature_initiale_garnissage
-            )
+            temperature_initiale = np.ones(n_points) * self.substance.temperature
         else:
             temperature_initiale = self.phases[-1][:, -1]
         T = self._simuler_phase(temperature_initiale, fluide, duree, direction)
@@ -228,6 +225,24 @@ class Garnissage:
         anim = FuncAnimation(fig, animate2, frames=int(T.shape[1] / step), interval=20)
         anim.save(f"{nom_fichier}.mp4", writer="ffmpeg")
 
+    def plot_temperatures_at_fractions(self, fractions: list[float]):
+        """
+        Trace la température en fonction du temps aux positions données.
+
+        fraction: liste de fractions de la longueur du garnissage (0 = début, 1 = fin)
+        """
+        T = self.get_resultats()
+        fig, ax = plt.subplots()
+        ax.set_xlabel("t (s)")
+        ax.set_ylabel("Temperature (K)")
+        for fraction in fractions:
+            x_point = int(fraction * T.shape[0])
+            ax.plot(
+                T[x_point, :], label=f"x = {fraction*self.longueur_garnissage:.2f} m"
+            )
+        ax.legend()
+        plt.show()
+
     def get_min_temperature_at_end(self):
         T = self.get_resultats()
         return np.min(T[:, -1])
@@ -239,8 +254,9 @@ class Garnissage:
 
 if __name__ == "__main__":
     debit = 0.9438949  # m3/s (valeur absolue)
-    A_conduite = 1  # m2
+    A_conduite = 0.01  # m2
     vitesse_fluide = debit / A_conduite  # m/s
+    vitesse_fluide = 4.8
 
     co2 = Substance(
         temperature=1090,
@@ -257,31 +273,34 @@ if __name__ == "__main__":
     )
 
     subst_garnissage = Substance(
-        temperature=500,
+        temperature=500,  # température initiale du garnissage
         densite=2600,
         chaleur_specifique=1000,
         conductivite_thermique=2,
     )
 
     # Créer le garnissage
+    length_multiplier = 1
     garni = Garnissage(
         substance=subst_garnissage,
         vitesse_fluide=vitesse_fluide,
         ratio_volume_solide=0.5,
-        longueur_garnissage=1.6,
-        temperature_initiale_garnissage=450,
+        longueur_garnissage=1.6 * length_multiplier,
         resolution_temporelle=0.3,  # augmenter pour accélérer le calcul (et la vitesse de l'animation)
-        resolution_spatiale=0.015,  # augmenter pour accélérer la simulation (mais moins précis)
+        resolution_spatiale=0.015
+        / length_multiplier,  # augmenter pour accélérer la simulation (mais moins précis)
     )
 
     # Démarrer les phases
-    for i in range(10):
+    nb_cycles = 5
+    for i in range(nb_cycles):
         print(f"Cycle {i+1}")
         garni.demarrer_phase(air, direction=1, duree=100)
         garni.demarrer_phase(air, direction=1, duree=100)
         garni.demarrer_phase(co2, direction=-1, duree=100)
         print(f"\n")
 
-    # Animations
-    garni.animer_ligne("ligne", step=10)
-    garni.animer_heatmap("heatmap", step=10)
+    # Animations et graphiques
+    garni.animer_ligne("ligne", step=nb_cycles)
+    # garni.animer_heatmap("heatmap", step=10)
+    garni.plot_temperatures_at_fractions(fractions=[0.25, 0.5, 0.75])
