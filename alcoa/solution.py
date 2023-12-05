@@ -1,11 +1,9 @@
-from calendar import c
 from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
 import numpy as np
 from findiff import PDE, BoundaryConditions, FinDiff
 from matplotlib.animation import FuncAnimation
-from sympy import Subs
 
 
 @dataclass
@@ -302,5 +300,5 @@ if __name__ == "__main__":
 
     # Animations et graphiques
     garni.animer_ligne("ligne", step=nb_cycles)
-    # garni.animer_heatmap("heatmap", step=10)
+    garni.animer_heatmap("heatmap", step=10)
     garni.plot_temperatures_at_fractions(fractions=[0.25, 0.5, 0.75])
