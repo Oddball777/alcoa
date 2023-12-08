@@ -276,60 +276,27 @@ if __name__ == "__main__":
     )
 
     # Créer le garnissage
-    nb_cycles = 15
-    resultats = []
-    for i in [0.5, 1, 2]:
-        length_multiplier = i  # Changer à 0.5 et 2
-        garni = Garnissage(
-            substance=subst_garnissage,
-            vitesse_fluide=vitesse_fluide,
-            ratio_volume_solide=0.5,
-            hauteur_garnissage=1.6 * length_multiplier,
-            resolution_temporelle=0.3,  # augmenter pour accélérer le calcul (et la vitesse de l'animation)
-            resolution_spatiale=0.015
-            * length_multiplier,  # augmenter pour accélérer la simulation (mais moins précis)
-        )
+    length_multiplier = 1  # Changer à 0.5 et 2 pour augmenter et diminuer la longueur du garnissage de 50%
+    garni = Garnissage(
+        substance=subst_garnissage,
+        vitesse_fluide=vitesse_fluide,
+        ratio_volume_solide=0.5,
+        hauteur_garnissage=1.6 * length_multiplier,
+        resolution_temporelle=0.3,  # augmenter pour accélérer le calcul (et la vitesse de l'animation)
+        resolution_spatiale=0.015
+        * length_multiplier,  # augmenter pour accélérer la simulation (mais moins précis)
+    )
 
-        # Démarrer les phases
-        for i in range(nb_cycles):
-            print(f"Cycle {i+1}")
-            garni.demarrer_phase(air, direction=1, duree=100)
-            garni.demarrer_phase(air, direction=1, duree=100)
-            garni.demarrer_phase(co2, direction=-1, duree=100)
-            print(f"\n")
+    # Démarrer les phases
+    nb_cycles = 5
+    for i in range(nb_cycles):
+        print(f"Cycle {i+1}")
+        garni.demarrer_phase(air, direction=1, duree=100)
+        garni.demarrer_phase(air, direction=1, duree=100)
+        garni.demarrer_phase(co2, direction=-1, duree=100)
+        print(f"\n")
 
-        # Animations et graphiques
-        # garni.animer_ligne(f"ligne_{length_multiplier*1.6}", step=nb_cycles)
-        # garni.animer_heatmap(f"heatmap_{length_multiplier*1.6}", step=10)
-        # garni.plot_temperatures_at_x(fractions=[0.25, 0.5, 0.75])
-
-        T = garni.get_resultats()
-        resultats.append(T)
-
-    # Create a scatter plot of the temperature at the end the phase 2 of each cycle at x = 0.75 * 1.6 * length_multiplier
-    # Each cycle has 3 phases, so we take the 2nd phase of each cycle
-    # Each phase is 100 s long, so we take the temperature at 100 s
-    # Each phase has 100 / 0.3 = 333 points in time
-    # So in time
-    # Each point is separated by 0.015 * length_multiplier m
-    fig, ax = plt.subplots()
-    ax.set_xlabel("Cycle")
-    ax.set_ylabel("Température (K)")
-    ax.set_xlim(0, nb_cycles)
-    # ax.set_ylim(0, 1200)
-    for i in range(len(resultats)):
-        T = resultats[i]
-        length_multiplier = [0.5, 1, 2][i]
-        y_vals = T[
-            int(0.99 * 1.6 * length_multiplier / (0.015 * length_multiplier)),
-            325 :: 333 * 3,
-        ]
-        print(f"For {1.6*length_multiplier:.2f} : {y_vals[-1]} K")
-        ax.scatter(
-            range(nb_cycles),
-            y_vals,
-            label=f"h = {1.6 * length_multiplier:.2f} m",
-        )
-    ax.legend()
-    # plt.savefig("scatter.png")
-    plt.show()
+    # Animations et graphiques
+    garni.animer_ligne(f"ligne_{length_multiplier*1.6}", step=nb_cycles)
+    garni.animer_heatmap(f"heatmap_{length_multiplier*1.6}", step=10)
+    garni.plot_temperatures_at_x(fractions=[0.25, 0.5, 0.75])
